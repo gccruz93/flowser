@@ -1,0 +1,19 @@
+{
+  "semi": false,
+  "singleQuote": true,
+  "endOfLine": "lf",
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "useTabs": false,
+  "vueIndentScriptAndStyle": true,
+  "importOrder": [
+    "^vue",
+    "<THIRD_PARTY_MODULES>",
+    "^[./]"
+  ],
+  "plugins": [
+    "prettier-plugin-tailwindcss"
+  ],
+  "importOrderSeparation": false,
+  "importOrderSortSpecifiers": true
+}
