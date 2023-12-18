@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "Flowser",
+  "version": "1.0.0",
+  "description": "Flow + Browser: Deixando mais fluida a navegação de diversos sites ;).",
+  "icons": {
+    "48": "icon.png"
+  },
+  "action": {
+    "default_popup": "index.html"
+  },
+  "permissions": [
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "content_scripts": [
+    {
+      "js": ["sites/youtube.js"],
+      "matches": [
+        "*://youtube.com/*",
+        "*://www.youtube.com/*",
+        "*://m.youtube.com/*"
+      ]
+    },
+    {
+      "js": ["sites/agazeta.js"],
+      "matches": [
+        "*://agazeta.com.br/*",
+        "*://www.agazeta.com.br/*"
+      ]
+    },
+    {
+      "js": ["sites/thegamer.js"],
+      "matches": [
+        "*://thegamer.com/*",
+        "*://www.thegamer.com/*"
+      ]
+    }
+  ]
+}
