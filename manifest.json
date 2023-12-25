@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Flowser",
+  "version": "1.0.0",
+  "description": "Ad skiper + Ad hider*",
+  "icons": {
+    "48": "popup/icon.png"
+  },
+  "action": {
+    "default_title": "Flowser",
+    "default_popup": "popup/popup.html"
+  },
+  "background": {
+    "service_worker": "service_worker.js"
+  },
+  "permissions": [
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://*.youtube.com/*"
+  ],
+  "content_scripts": [{ 
+      "js": ["popup/jquery.min.js", "sites/youtube.js"],
+      "css": ["sites/youtube.css"],
+      "matches": ["https://*.youtube.com/*"]
+  }]
+}

@@ -3,13 +3,10 @@
   "editor.linkedEditing": true,
   "editor.tabSize": 2,
   "eslint.validate": [
-    "javascript",
-    "vue"
+    "javascript"
   ],
   "files.eol": "\n",
-  "vue.inlayHints.missingProps": true,
-  "vue.inlayHints.optionsWrapper": true,
-  "[css][javascript][typescript][vue]": {
+  "[html][css][javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "editor.tabSize": 2,

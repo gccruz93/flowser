@@ -1,22 +1,24 @@
 /** @type {import('tailwindcss').Config} */
-export default {
-  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
+module.exports = {
+  content: ['popup/popup.html'],
   theme: {
     extend: {
+      borderColor: {
+        DEFAULT: 'var(--border)',
+      },
       colors: {
         primary: {
-          DEFAULT: '#68d3b0',
-          hover: '#4da789',
+          DEFAULT: 'var(--primary)',
+          hover: 'var(--primary-hover)',
         },
       },
       fontSize: {
-        '3xs': '11px',
-        '2xs': '11.7px',
+        sm: '11px',
+        base: '11.7px',
       },
     },
   },
   experimental: {
     optimizeUniversalDefaults: true,
   },
-  plugins: [],
-}
+};

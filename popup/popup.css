@@ -1,0 +1,76 @@
+@import 'wave.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #68d3b0;
+  --primary-hover: #4da789;
+  --border: theme('colors.neutral.800');
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #111111;
+}
+
+body {
+  @apply text-base;
+  overflow: hidden;
+  width: 280px;
+  min-width: 280px;
+  max-width: 280px;
+}
+
+.link {
+  @apply text-primary hover:text-primary-hover;
+}
+
+div {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-hover) #000000;
+}
+div::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+div::-webkit-scrollbar-track {
+  background: #000000;
+  border-radius: 9999px;
+}
+div::-webkit-scrollbar-thumb {
+  background-color: var(--primary-hover);
+  border-radius: 9999px;
+  border: 1px solid #000000;
+}
+
+.toggle {
+  --bg: transparent;
+  --chk: theme('colors.neutral.900');
+  background-color: var(--chk);
+  box-shadow: -18px 0 0 2px var(--bg) inset, 0 0 0 2px var(--bg) inset;
+  height: 16px;
+  width: 32px;
+  border-radius: 9999px;
+  border-width: 1px;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+  appearance: none;
+  cursor: pointer;
+}
+.toggle:checked {
+  --chk: var(--primary);
+  box-shadow: 18px 0 0 2px var(--bg) inset, 0 0 0 2px var(--bg) inset;
+}
+.toggle:checked:disabled,
+.toggle:checked.disabled {
+  background-color: theme('colors.stone.800') !important;
+}
+.toggle:disabled,
+.toggle.disabled {
+  background-color: theme('colors.stone.800') !important;
+}
+.toggle:focus-visible {
+  outline: 2px solid var(--primary);
+}
+.label-toggle {
+  @apply inline-flex h-7 max-w-max cursor-pointer select-none items-center justify-between gap-2 hover:text-white;
+}
