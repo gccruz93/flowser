@@ -14,6 +14,10 @@ const init = async () => {
         blockAdsCards: true,
         hideLiveChat: true,
       },
+      twitch: {
+        autoAdsMute: true,
+        autoAdsMuteCount: 0,
+      },
     },
   };
 

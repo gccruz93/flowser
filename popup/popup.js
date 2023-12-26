@@ -12,6 +12,10 @@ const init = async () => {
         blockAdsCards: true,
         hideLiveChat: true,
       },
+      twitch: {
+        autoAdsMute: true,
+        autoAdsMuteCount: 0,
+      },
     },
   };
 
@@ -105,6 +109,34 @@ const init = async () => {
   );
   $('#youtube-chk-hideLiveChat').on('change', (e) => {
     defaultStorage.sites.youtube.hideLiveChat = e.target.checked;
+    saveStorage();
+  });
+
+  /**
+   * Sites.Twitch
+   */
+  $('#twitch-total-count').text(defaultStorage.sites.twitch.autoAdsMuteCount);
+  $('#twitch-collapse').hide();
+  let isTwitchOpened = false;
+  const toggleTwitch = () => {
+    if (!isTwitchOpened) {
+      $('#twitch-collapse').show();
+      $('#twitch-collapse-title svg').addClass('rotate-180');
+      isTwitchOpened = true;
+    } else {
+      $('#twitch-collapse').hide();
+      $('#twitch-collapse-title svg').removeClass('rotate-180');
+      isTwitchOpened = false;
+    }
+  };
+  $('#twitch-collapse-title').on('click', toggleTwitch);
+
+  $('#twitch-chk-autoAdsMute').prop(
+    'checked',
+    defaultStorage.sites.twitch.autoAdsMute
+  );
+  $('#twitch-chk-autoAdsMute').on('change', (e) => {
+    defaultStorage.sites.twitch.autoAdsMute = e.target.checked;
     saveStorage();
   });
 };

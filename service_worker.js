@@ -11,6 +11,10 @@ const defaultStorage = {
       blockAdsCards: true,
       hideLiveChat: true,
     },
+    twitch: {
+      autoAdsMute: true,
+      autoAdsMuteCount: 0,
+    },
   },
 };
 

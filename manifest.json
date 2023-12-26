@@ -18,11 +18,18 @@
     "storage"
   ],
   "host_permissions": [
-    "https://*.youtube.com/*"
+    "https://*.youtube.com/*",
+    "https://*.twitch.tv/*"
   ],
-  "content_scripts": [{ 
+  "content_scripts": [
+    {
       "js": ["popup/jquery.min.js", "sites/youtube.js"],
       "css": ["sites/youtube.css"],
       "matches": ["https://*.youtube.com/*"]
-  }]
+    },
+    {
+      "js": ["popup/jquery.min.js", "sites/twitch.js"],
+      "matches": ["https://*.twitch.tv/*"]
+    }
+  ]
 }
