@@ -1,6 +1,6 @@
-const startTime = performance.now();
-
 const init = async () => {
+  const startTime = performance.now();
+
   let defaultStorage = {
     config: {
       logs: false,
@@ -113,31 +113,10 @@ const init = async () => {
   updateCurrentVideoInfo();
   setInterval(() => {
     updateCurrentVideoInfo();
-  }, 5000);
+  }, 3000);
   setInterval(() => {
     updateDislikeBtnText();
   }, 500);
-
-  /**
-   * Observer =============================
-   */
-  const ob = new MutationObserver(() => {
-    log('mutation observed');
-
-    if (defaultStorage.sites.youtube.autoConfirmSkip) {
-      autoConfirmVideo();
-    }
-
-    if (defaultStorage.sites.youtube.hideLiveChat) {
-      hideLiveChat();
-    }
-
-    if (defaultStorage.sites.youtube.autoVideoAdSkip) {
-      skipYoutubeAd();
-    }
-
-    saveStorage();
-  });
 
   const autoConfirmVideo = () => {
     const confirmButton = document.getElementById('confirm-button');
@@ -150,7 +129,6 @@ const init = async () => {
       }
     }
   };
-
   const hideLiveChat = () => {
     try {
       const liveChatContainer = document.getElementById('chat');
@@ -167,17 +145,43 @@ const init = async () => {
     }
   };
 
-  const toggleKeyM = () => {
-    const e = $.Event('keydown', { keyCode: 77 }); // 77 is the ASCII value for 'm'
-    $(document).trigger(e);
+  /**
+   * Volume button ===========================
+   */
+  const getVolumeButton = () => {
+    if (!document.querySelectorAll('.ytp-mute-button').length) return null;
+    const muteButton = document.querySelectorAll('.ytp-mute-button')[0];
+    if (!muteButton) return null;
+    return muteButton;
   };
+  /**
+   *
+   * @param {HTMLElement} volumeButton
+   */
+  const isVideoMuted = (volumeButton) => {
+    if (!volumeButton) volumeButton = getVolumeButton();
+    return ['Reativar o som', 'Unmute'].includes(
+      volumeButton.getAttribute('data-title-no-tooltip')
+    );
+  };
+  const muteVideo = () => {
+    const volumeButton = getVolumeButton();
+    if (isVideoMuted(volumeButton)) return;
+    volumeButton.click();
+  };
+  const unmuteVideo = () => {
+    const volumeButton = getVolumeButton();
+    if (!isVideoMuted(volumeButton)) return;
+    volumeButton.click();
+  };
+
   const skipYoutubeAd = () => {
     try {
       const adElement = document.querySelector('.ad-showing');
       const overlayAds = document.querySelectorAll('.video-ads');
 
       if (adElement) {
-        toggleKeyM();
+        muteVideo();
         const video = document.querySelector('.ad-showing video');
 
         video.currentTime = video?.duration || 9999; // if video?.duration is NaN set video to 9999 sec to make sure it goes to the end
@@ -190,8 +194,11 @@ const init = async () => {
           skipButton.click();
         }
 
-        toggleKeyM();
         defaultStorage.sites.youtube.autoVideoAdSkipCount++;
+
+        setTimeout(() => {
+          unmuteVideo();
+        }, 300);
       }
 
       for (const overlayAd of overlayAds) {
@@ -202,7 +209,51 @@ const init = async () => {
     }
   };
 
-  ob.observe(document.body, { childList: true });
+  /**
+   * Observer =============================
+   */
+  const bodyMutationObserver = new MutationObserver(() => {
+    // log('MutationObserver: body');
+
+    if (defaultStorage.sites.youtube.autoConfirmSkip) {
+      autoConfirmVideo();
+    }
+
+    if (defaultStorage.sites.youtube.hideLiveChat) {
+      hideLiveChat();
+    }
+
+    if (defaultStorage.sites.youtube.autoVideoAdSkip) {
+      skipYoutubeAd();
+    }
+
+    // saveStorage();
+  });
+  bodyMutationObserver.observe(document.body, { childList: true });
+
+  const videoMutationObserver = new MutationObserver(() => {
+    // log('MutationObserver: video');
+
+    if (defaultStorage.sites.youtube.autoVideoAdSkip) {
+      skipYoutubeAd();
+    }
+
+    // saveStorage();
+  });
+  const setVideoPlayerObserver = async () => {
+    if (document.querySelector('.html5-video-player')) {
+      videoMutationObserver.observe(
+        document.querySelector('.html5-video-player'),
+        {
+          attributes: true,
+        }
+      );
+    } else {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      setVideoPlayerObserver();
+    }
+  };
+  setVideoPlayerObserver();
 
   log(`loaded in ${Math.round(performance.now() - startTime)}ms.`);
 };
