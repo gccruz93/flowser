@@ -1,5 +1,4 @@
 dist
-*.zip
 node_modules
 
 # Editor directories and files
