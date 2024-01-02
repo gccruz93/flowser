@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Flowser",
-  "version": "1.0.0",
-  "description": "Ad skiper + Ad hider*",
+  "version": "1.0.1",
+  "description": "Ad skiper/hider",
   "icons": {
     "48": "popup/icon.png"
   },
