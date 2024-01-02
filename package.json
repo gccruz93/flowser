@@ -6,6 +6,6 @@
     "build": "node ./build.js"
   },
   "devDependencies": {
-    "node-zip": "^1.1.1"
+    "archiver": "^6.0.1"
   }
 }
