@@ -4,5 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "node ./build.js"
+  },
+  "devDependencies": {
+    "node-zip": "^1.1.1"
   }
 }
