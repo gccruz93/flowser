@@ -9,7 +9,6 @@ const defaultStorage = {
       autoVideoAdSkip: true,
       autoVideoAdSkipCount: 0,
       blockAdsCards: true,
-      hideLiveChat: true,
     },
     twitch: {
       autoAdsMute: true,

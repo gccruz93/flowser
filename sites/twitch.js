@@ -19,41 +19,41 @@ const init = async () => {
 
   log('running on twitch...');
 
-  /**
-   * Observer =============================
-   */
-  // const ob = new MutationObserver(() => {
-  //   log('mutation observed');
-
-  // handleVideoAds();
-
-  // saveStorage();
-  // });
-
   let isQualityByAds = false;
   let isMutedByAds = false;
+  let isAdModeActive = false;
+  const openVideoConfig = (callback) => {
+    const buttonsPlayerControls = document
+      .querySelectorAll('[data-a-target="player-controls"]')[0]
+      .getElementsByTagName('button');
+    const configButton = buttonsPlayerControls[2];
+    configButton.click();
+
+    setTimeout(() => {
+      callback();
+    }, 150);
+  };
+  const openQualityMenu = (callback) => {
+    setTimeout(() => {
+      document
+        .querySelectorAll('[role="menuitem"]')[2]
+        ?.querySelector('button')
+        ?.click();
+
+      callback();
+    }, 150);
+  };
   const setAutomaticQuality = () => {
     if (!isQualityByAds) return;
     try {
-      const buttonsPlayerControls = document
-        .querySelectorAll('[data-a-target="player-controls"]')[0]
-        .getElementsByTagName('button');
-      const configButton = buttonsPlayerControls[2];
-      configButton.click();
-
+      openVideoConfig();
       isQualityByAds = false;
-
-      setTimeout(() => {
-        document
-          .querySelectorAll('[role="menuitem"]')[2]
-          ?.querySelector('button')
-          ?.click();
-
+      openQualityMenu(() => {
         setTimeout(() => {
           document.querySelectorAll('[role="menuitemradio"]')[0]?.click();
           document.querySelector('.Layout-sc-1xcs6mc-0.kuGBVB')?.click();
         }, 100);
-      }, 150);
+      });
     } catch (err) {
       console.log(err);
     }
@@ -61,26 +61,15 @@ const init = async () => {
   const setLowQuality = () => {
     if (isQualityByAds) return;
     try {
-      const buttonsPlayerControls = document
-        .querySelectorAll('[data-a-target="player-controls"]')[0]
-        .getElementsByTagName('button');
-      const configButton = buttonsPlayerControls[2];
-      configButton.click();
-
+      openVideoConfig();
       isQualityByAds = true;
-
-      setTimeout(() => {
-        document
-          .querySelectorAll('[role="menuitem"]')[2]
-          ?.querySelector('button')
-          ?.click();
-
+      openQualityMenu(() => {
         setTimeout(() => {
           const options = document.querySelectorAll('[role="menuitemradio"]');
           options[options.length - 1]?.click();
           document.querySelector('.Layout-sc-1xcs6mc-0.kuGBVB')?.click();
         }, 100);
-      }, 150);
+      });
     } catch (err) {
       console.log(err);
     }
@@ -127,16 +116,51 @@ const init = async () => {
       audioUnmute();
       return;
     }
+
     log('ad detected');
+    isAdModeActive = true;
 
     setLowQuality();
     audioMute();
   };
-  setInterval(() => {
-    handleVideoAds();
-  }, 500);
 
-  // ob.observe(document.body, { childList: true });
+  /**
+   * Observer =============================
+   */
+  const ob = new MutationObserver((mutations) => {
+    log('mutation observed');
+    console.log(mutations);
+    // console.log(
+    //   document.querySelectorAll(
+    //     '[data-a-target="player-overlay-click-handler"]'
+    //   )
+    // );
+    // if (
+    //   !document.querySelectorAll(
+    //     '[data-a-target="player-overlay-click-handler"]'
+    //   ).length
+    // )
+    //   return;
+
+    // log('ad detected');
+
+    // mutations.forEach((mutation) => {
+    //   if (mutation.attributeName === 'class') {
+    //     const currentState = mutation.target.classList.contains('is-busy');
+    //     if (prevState !== currentState) {
+    //       prevState = currentState;
+    //       console.log(`'is-busy' class ${currentState ? 'added' : 'removed'}`);
+    //     }
+    //   }
+    // });
+
+    // handleVideoAds();
+  });
+  ob.observe(document.querySelector('.video-player__default-player'), {
+    attributes: true,
+    childList: true,
+    subtree: true,
+  });
 
   log(`loaded in ${Math.round(performance.now() - startTime)}ms.`);
 };

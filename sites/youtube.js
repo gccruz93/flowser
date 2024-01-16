@@ -1,28 +1,8 @@
 const init = async () => {
   const startTime = performance.now();
 
-  let defaultStorage = {
-    config: {
-      logs: false,
-    },
-    sites: {
-      youtube: {
-        autoConfirmSkip: true,
-        autoConfirmSkipCount: 0,
-        autoVideoAdSkip: true,
-        autoVideoAdSkipCount: 0,
-        blockAdsCards: true,
-        hideLiveChat: true,
-      },
-      twitch: {
-        autoAdsMute: true,
-        autoAdsMuteCount: 0,
-      },
-    },
-  };
-
   const log = (description, force = false) => {
-    // if (!force && !defaultStorage.config.logs) return;
+    // if (!force && !storage.data.config.logs) return;
 
     const date = new Date();
     const hours = date.getHours().toString().padStart(2, '0');
@@ -37,142 +17,140 @@ const init = async () => {
     );
   };
 
-  const loadStorage = async () => {
-    log('fetching storage...', true);
-    if (chrome.storage) {
-      const storage = await chrome.storage.sync.get(['sites', 'config']);
-      defaultStorage = mergeObjects(defaultStorage, storage);
-      console.log('storage', defaultStorage);
-      chrome.storage.sync.set(defaultStorage);
-    } else {
-      log('chrome.storage not found', true);
-    }
+  const storage = {
+    data: {
+      config: {
+        logs: false,
+      },
+      sites: {
+        youtube: {
+          autoConfirmSkip: true,
+          autoConfirmSkipCount: 0,
+          autoVideoAdSkip: true,
+          autoVideoAdSkipCount: 0,
+          blockAdsCards: true,
+        },
+        twitch: {
+          autoAdsMute: true,
+          autoAdsMuteCount: 0,
+        },
+      },
+    },
+
+    load: async () => {
+      log('fetching storage...', true);
+      if (chrome.storage) {
+        const store = await chrome.storage.sync.get(['sites', 'config']);
+        storage.data = mergeObjects(storage.data, store);
+        console.log('storage', storage.data);
+        chrome.storage.sync.set(storage.data);
+      } else {
+        log('chrome.storage not found', true);
+      }
+    },
+    save: () => {
+      if (chrome.storage) {
+        chrome.storage.sync.set(storage.data);
+      }
+    },
   };
-  const saveStorage = () => {
-    if (chrome.storage) {
-      chrome.storage.sync.set(defaultStorage);
-    }
-  };
-  loadStorage();
+
+  await storage.load();
 
   log('running youtube cleaner...');
 
   /**
-   * Video info ===========================
+   * Elements ===========================
    */
-  const currentVideo = {
+  const video = {
     id: '',
-    dislikes: 0,
-  };
-  const getVideoId = () => {
-    const urlObject = new URL(window.location.href);
-    const pathname = urlObject.pathname;
-    if (pathname.startsWith('/clip')) {
-      return document.querySelector("meta[itemprop='videoId']").content;
-    } else {
+    lastId: '',
+    info: {
+      dislikes: 0,
+    },
+
+    getId: () => {
+      const urlObject = new URL(window.location.href);
+      const pathname = urlObject.pathname;
+
+      if (pathname.startsWith('/clip')) {
+        video.id = document.querySelector("meta[itemprop='videoId']").content;
+        return;
+      }
+
       if (pathname.startsWith('/shorts')) {
-        return pathname.slice(8);
+        video.id = pathname.slice(8);
+        return;
       }
-      return urlObject.searchParams.get('v');
-    }
-  };
-  const getVideoInfo = async (id) => {
-    const response = await fetch(
-      `https://returnyoutubedislikeapi.com/votes?videoId=${id}`
-    );
-    return await response.json();
-  };
-  const updateCurrentVideoInfo = async () => {
-    const videoId = getVideoId();
-    if (!videoId || videoId == currentVideo.id) return;
-    log('fetching video info...');
-    currentVideo.id = videoId;
-    const { dislikes } = await getVideoInfo(currentVideo.id);
-    currentVideo.dislikes = dislikes;
-  };
-  const updateDislikeBtnText = () => {
-    const dislikeBtn = document.querySelector(
-      'dislike-button-view-model button'
-    );
-    if (!dislikeBtn) return;
 
-    const dislikeBtnIcon = dislikeBtn.querySelector(
-      '.yt-spec-button-shape-next__icon'
-    );
-    if (!dislikeBtnIcon) return;
+      video.id = urlObject.searchParams.get('v');
+    },
+    getInfo: async () => {
+      const response = await fetch(
+        `https://returnyoutubedislikeapi.com/votes?videoId=${video.id}`
+      );
+      const info = await response.json();
 
-    let dislikeText = document.getElementById('dislike-text');
-    if (!dislikeText) dislikeText = document.createElement('div');
+      video.info.dislikes = info.dislikes;
+    },
 
-    dislikeText.id = 'dislike-text';
-    dislikeText.style.margin = '0 0 0 6px';
-    dislikeText.innerHTML = currentVideo.dislikes;
-    dislikeBtnIcon.after(dislikeText);
-    dislikeBtn.style.width = '80px';
-  };
-  updateCurrentVideoInfo();
-  setInterval(() => {
-    updateCurrentVideoInfo();
-  }, 3000);
-  setInterval(() => {
-    updateDislikeBtnText();
-  }, 500);
-
-  const autoConfirmVideo = () => {
-    const confirmButton = document.getElementById('confirm-button');
-    if (confirmButton) {
-      log(confirmButton);
-      if (confirmButton.classList.contains('yt-confirm-dialog-renderer')) {
-        log('confirmou');
-        confirmButton.click();
-        defaultStorage.sites.youtube.autoConfirmSkipCount++;
-      }
-    }
-  };
-  const hideLiveChat = () => {
-    try {
-      const liveChatContainer = document.getElementById('chat');
-      const liveChatFrame = document.getElementById('chatframe');
-      if (liveChatFrame) {
-        const labelText =
-          liveChatFrame.contentWindow.document.querySelector('#label-text');
-        if (labelText && labelText.innerHTML.includes('chat')) {
-          liveChatContainer.remove();
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
+    interval: 0,
+    setInterval: () => {
+      video.interval = setInterval(() => {
+        video.getId();
+        if (!video.id || video.id == video.lastId) return;
+        log('fetching video info...');
+        video.lastId = video.id;
+        video.getInfo();
+      }, 3000);
+    },
   };
 
-  /**
-   * Volume button ===========================
-   */
-  const getVolumeButton = () => {
-    if (!document.querySelectorAll('.ytp-mute-button').length) return null;
-    const muteButton = document.querySelectorAll('.ytp-mute-button')[0];
-    if (!muteButton) return null;
-    return muteButton;
+  const dislikeButton = {
+    query: () => {
+      return document.querySelector('dislike-button-view-model button');
+    },
+
+    update: () => {
+      const el = dislikeButton.query();
+      if (!el) return;
+
+      const iconEl = el.querySelector('.yt-spec-button-shape-next__icon');
+      if (!iconEl) return;
+
+      const text =
+        document.getElementById('dislike-text') ||
+        document.createElement('div');
+
+      text.id = 'dislike-text';
+      text.style.margin = '0 0 0 6px';
+      text.innerHTML = video.info.dislikes;
+      iconEl.after(text);
+      el.style.width = '80px';
+    },
+
+    interval: 0,
+    setInterval: () => {
+      dislikeButton.interval = setInterval(() => {
+        dislikeButton.update();
+      }, 250);
+    },
   };
-  /**
-   *
-   * @param {HTMLElement} volumeButton
-   */
-  const isVideoMuted = (volumeButton) => {
-    if (!volumeButton) volumeButton = getVolumeButton();
-    return ['Reativar o som', 'Unmute'].includes(
-      volumeButton.getAttribute('data-title-no-tooltip')
-    );
-  };
-  const muteVideo = () => {
-    const volumeButton = getVolumeButton();
-    if (isVideoMuted(volumeButton)) return;
-    volumeButton.click();
-  };
-  const unmuteVideo = () => {
-    const volumeButton = getVolumeButton();
-    if (!isVideoMuted(volumeButton)) return;
-    volumeButton.click();
+
+  const confirmButton = {
+    query: () => {
+      return document.getElementById('confirm-button');
+    },
+
+    click: () => {
+      const el = confirmButton.query();
+      if (!el) return;
+      log(el);
+      if (!el.classList.contains('yt-confirm-dialog-renderer')) return;
+      log('confirmou');
+      el.click();
+      storage.data.sites.youtube.autoConfirmSkipCount++;
+    },
   };
 
   const skipYoutubeAd = () => {
@@ -181,10 +159,10 @@ const init = async () => {
       const overlayAds = document.querySelectorAll('.video-ads');
 
       if (adElement) {
-        muteVideo();
+        console.log('skipping video');
         const video = document.querySelector('.ad-showing video');
 
-        video.currentTime = video?.duration || 9999; // if video?.duration is NaN set video to 9999 sec to make sure it goes to the end
+        video.currentTime = video?.duration || 9999;
 
         const skipButtons = document.querySelectorAll(
           '.ytp-ad-skip-button-modern'
@@ -194,11 +172,7 @@ const init = async () => {
           skipButton.click();
         }
 
-        defaultStorage.sites.youtube.autoVideoAdSkipCount++;
-
-        setTimeout(() => {
-          unmuteVideo();
-        }, 300);
+        storage.data.sites.youtube.autoVideoAdSkipCount++;
       }
 
       for (const overlayAd of overlayAds) {
@@ -210,50 +184,20 @@ const init = async () => {
   };
 
   /**
-   * Observer =============================
+   * Starting events ===========================
    */
-  const bodyMutationObserver = new MutationObserver(() => {
-    // log('MutationObserver: body');
+  video.setInterval();
+  dislikeButton.setInterval();
 
-    if (defaultStorage.sites.youtube.autoConfirmSkip) {
-      autoConfirmVideo();
+  setInterval(() => {
+    if (storage.data.sites.youtube.autoConfirmSkip) {
+      confirmButton.click();
     }
 
-    if (defaultStorage.sites.youtube.hideLiveChat) {
-      hideLiveChat();
-    }
-
-    if (defaultStorage.sites.youtube.autoVideoAdSkip) {
+    if (storage.data.sites.youtube.autoVideoAdSkip) {
       skipYoutubeAd();
     }
-
-    // saveStorage();
-  });
-  bodyMutationObserver.observe(document.body, { childList: true });
-
-  const videoMutationObserver = new MutationObserver(() => {
-    // log('MutationObserver: video');
-
-    if (defaultStorage.sites.youtube.autoVideoAdSkip) {
-      skipYoutubeAd();
-    }
-
-    // saveStorage();
-  });
-  const setVideoPlayerObserver = async () => {
-    if (document.querySelector('.html5-video-player')) {
-      videoMutationObserver.observe(
-        document.querySelector('.html5-video-player'),
-        {
-          attributes: true,
-        }
-      );
-    } else {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      setVideoPlayerObserver();
-    }
-  };
-  setVideoPlayerObserver();
+  }, 200);
 
   log(`loaded in ${Math.round(performance.now() - startTime)}ms.`);
 };
@@ -266,11 +210,11 @@ document.addEventListener('readystatechange', (event) => {
   }
 });
 
-function mergeObjects(obj1, obj2) {
+const mergeObjects = (obj1, obj2) => {
   for (let key in obj1) {
     if (obj2.hasOwnProperty(key)) {
       obj1[key] = obj2[key];
     }
   }
   return obj1;
-}
+};

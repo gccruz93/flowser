@@ -10,7 +10,6 @@ const init = async () => {
         autoVideoAdSkip: true,
         autoVideoAdSkipCount: 0,
         blockAdsCards: true,
-        hideLiveChat: true,
       },
       twitch: {
         autoAdsMute: true,
@@ -100,15 +99,6 @@ const init = async () => {
   );
   $('#youtube-chk-blockAdsCards').on('change', (e) => {
     defaultStorage.sites.youtube.blockAdsCards = e.target.checked;
-    saveStorage();
-  });
-
-  $('#youtube-chk-hideLiveChat').prop(
-    'checked',
-    defaultStorage.sites.youtube.hideLiveChat
-  );
-  $('#youtube-chk-hideLiveChat').on('change', (e) => {
-    defaultStorage.sites.youtube.hideLiveChat = e.target.checked;
     saveStorage();
   });
 
