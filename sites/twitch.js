@@ -98,6 +98,7 @@ const init = async () => {
       }
     },
   };
+  const clickDelayMs = 150;
   const video = {
     isQualityChangedByAds: false,
 
@@ -111,31 +112,31 @@ const init = async () => {
 
         setTimeout(() => {
           callback();
-        }, 150);
+        }, clickDelayMs);
       },
 
       quality: {
         click: (callback) => {
-          setTimeout(() => {
-            document
-              .querySelectorAll('[role="menuitem"]')[2]
-              ?.querySelector('button')
-              ?.click();
+          document
+            .querySelectorAll('[role="menuitem"]')[2]
+            ?.querySelector('button')
+            ?.click();
 
+          setTimeout(() => {
             callback();
-          }, 150);
+          }, clickDelayMs);
         },
+        close: () => {},
 
         auto: () => {
           if (!video.isQualityChangedByAds) return;
           try {
-            video.config.click();
-            video.isQualityChangedByAds = false;
-            video.config.quality.click(() => {
-              setTimeout(() => {
+            video.config.click(() => {
+              video.isQualityChangedByAds = false;
+              video.config.quality.click(() => {
                 document.querySelectorAll('[role="menuitemradio"]')[0]?.click();
-                document.querySelector('.Layout-sc-1xcs6mc-0.kuGBVB')?.click();
-              }, 100);
+                video.config.click();
+              });
             });
           } catch (err) {
             console.log(err);
@@ -144,16 +145,15 @@ const init = async () => {
         low: () => {
           if (video.isQualityChangedByAds) return;
           try {
-            video.config.click();
-            video.isQualityChangedByAds = true;
-            video.config.quality.click(() => {
-              setTimeout(() => {
+            video.config.click(() => {
+              video.isQualityChangedByAds = true;
+              video.config.quality.click(() => {
                 const options = document.querySelectorAll(
                   '[role="menuitemradio"]'
                 );
                 options[options.length - 1]?.click();
-                document.querySelector('.Layout-sc-1xcs6mc-0.kuGBVB')?.click();
-              }, 100);
+                video.config.click();
+              });
             });
           } catch (err) {
             console.log(err);
