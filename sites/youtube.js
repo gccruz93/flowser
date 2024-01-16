@@ -153,36 +153,6 @@ const init = async () => {
     },
   };
 
-  const skipYoutubeAd = () => {
-    try {
-      const adElement = document.querySelector('.ad-showing');
-      const overlayAds = document.querySelectorAll('.video-ads');
-
-      if (adElement) {
-        console.log('skipping video');
-        const video = document.querySelector('.ad-showing video');
-
-        video.currentTime = video?.duration || 9999;
-
-        const skipButtons = document.querySelectorAll(
-          '.ytp-ad-skip-button-modern'
-        );
-
-        for (const skipButton of skipButtons) {
-          skipButton.click();
-        }
-
-        storage.data.sites.youtube.autoVideoAdSkipCount++;
-      }
-
-      for (const overlayAd of overlayAds) {
-        overlayAd.style.visibility = 'hidden';
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   /**
    * Starting events ===========================
    */
@@ -195,7 +165,32 @@ const init = async () => {
     }
 
     if (storage.data.sites.youtube.autoVideoAdSkip) {
-      skipYoutubeAd();
+      try {
+        const adElement = document.querySelector('.ad-showing');
+        const overlayAds = document.querySelectorAll('.video-ads');
+
+        if (adElement) {
+          const video = document.querySelector('.ad-showing video');
+
+          video.currentTime = video?.duration || 9999;
+
+          const skipButtons = document.querySelectorAll(
+            '.ytp-ad-skip-button-modern'
+          );
+
+          for (const skipButton of skipButtons) {
+            skipButton.click();
+          }
+
+          storage.data.sites.youtube.autoVideoAdSkipCount++;
+        }
+
+        for (const overlayAd of overlayAds) {
+          overlayAd.style.visibility = 'hidden';
+        }
+      } catch (e) {
+        console.error(e);
+      }
     }
   }, 200);
 

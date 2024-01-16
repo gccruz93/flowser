@@ -17,150 +17,173 @@ const init = async () => {
     );
   };
 
+  const storage = {
+    data: {
+      config: {
+        logs: false,
+      },
+      sites: {
+        youtube: {
+          autoConfirmSkip: true,
+          autoConfirmSkipCount: 0,
+          autoVideoAdSkip: true,
+          autoVideoAdSkipCount: 0,
+          blockAdsCards: true,
+        },
+        twitch: {
+          autoAdsMute: true,
+          autoAdsMuteCount: 0,
+        },
+      },
+    },
+
+    load: async () => {
+      log('fetching storage...', true);
+      if (chrome.storage) {
+        const store = await chrome.storage.sync.get(['sites', 'config']);
+        storage.data = mergeObjects(storage.data, store);
+        console.log('storage', storage.data);
+        chrome.storage.sync.set(storage.data);
+      } else {
+        log('chrome.storage not found', true);
+      }
+    },
+    save: () => {
+      if (chrome.storage) {
+        chrome.storage.sync.set(storage.data);
+      }
+    },
+  };
+
+  await storage.load();
+
   log('running on twitch...');
 
-  let isQualityByAds = false;
-  let isMutedByAds = false;
-  let isAdModeActive = false;
-  const openVideoConfig = (callback) => {
-    const buttonsPlayerControls = document
-      .querySelectorAll('[data-a-target="player-controls"]')[0]
-      .getElementsByTagName('button');
-    const configButton = buttonsPlayerControls[2];
-    configButton.click();
+  /**
+   * Elements ===========================
+   */
+  const audio = {
+    isMutedByAds: false,
 
-    setTimeout(() => {
-      callback();
-    }, 150);
+    mute: () => {
+      if (audio.isMutedByAds) return;
+      try {
+        const buttonsPlayerControls = document
+          .querySelectorAll('[data-a-target="player-controls"]')[0]
+          .getElementsByTagName('button');
+        const audioButton = buttonsPlayerControls[1];
+        const container = audioButton.parentNode.parentNode;
+        const input = container.getElementsByTagName('input')[0];
+        if (+input.getAttribute('aria-valuenow') == 0) return;
+        audioButton.click();
+        audio.isMutedByAds = true;
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    unmute: () => {
+      if (!audio.isMutedByAds) return;
+      try {
+        audio.isMutedByAds = false;
+        const buttonsPlayerControls = document
+          .querySelectorAll('[data-a-target="player-controls"]')[0]
+          .getElementsByTagName('button');
+        const audioButton = buttonsPlayerControls[1];
+        const container = audioButton.parentNode.parentNode;
+        const input = container.getElementsByTagName('input')[0];
+        if (+input.getAttribute('aria-valuenow') > 0) return;
+        audioButton.click();
+      } catch (err) {
+        console.log(err);
+      }
+    },
   };
-  const openQualityMenu = (callback) => {
-    setTimeout(() => {
-      document
-        .querySelectorAll('[role="menuitem"]')[2]
-        ?.querySelector('button')
-        ?.click();
+  const video = {
+    isQualityChangedByAds: false,
 
-      callback();
-    }, 150);
-  };
-  const setAutomaticQuality = () => {
-    if (!isQualityByAds) return;
-    try {
-      openVideoConfig();
-      isQualityByAds = false;
-      openQualityMenu(() => {
+    config: {
+      click: (callback) => {
+        const buttonsPlayerControls = document
+          .querySelectorAll('[data-a-target="player-controls"]')[0]
+          .getElementsByTagName('button');
+        const configButton = buttonsPlayerControls[2];
+        configButton.click();
+
         setTimeout(() => {
-          document.querySelectorAll('[role="menuitemradio"]')[0]?.click();
-          document.querySelector('.Layout-sc-1xcs6mc-0.kuGBVB')?.click();
-        }, 100);
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  };
-  const setLowQuality = () => {
-    if (isQualityByAds) return;
-    try {
-      openVideoConfig();
-      isQualityByAds = true;
-      openQualityMenu(() => {
-        setTimeout(() => {
-          const options = document.querySelectorAll('[role="menuitemradio"]');
-          options[options.length - 1]?.click();
-          document.querySelector('.Layout-sc-1xcs6mc-0.kuGBVB')?.click();
-        }, 100);
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  };
-  const audioUnmute = () => {
-    if (!isMutedByAds) return;
-    try {
-      isMutedByAds = false;
-      const buttonsPlayerControls = document
-        .querySelectorAll('[data-a-target="player-controls"]')[0]
-        .getElementsByTagName('button');
-      const audioButton = buttonsPlayerControls[1];
-      const container = audioButton.parentNode.parentNode;
-      const input = container.getElementsByTagName('input')[0];
-      if (+input.getAttribute('aria-valuenow') > 0) return;
-      audioButton.click();
-    } catch (err) {
-      console.log(err);
-    }
-  };
-  const audioMute = () => {
-    if (isMutedByAds) return;
-    try {
-      const buttonsPlayerControls = document
-        .querySelectorAll('[data-a-target="player-controls"]')[0]
-        .getElementsByTagName('button');
-      const audioButton = buttonsPlayerControls[1];
-      const container = audioButton.parentNode.parentNode;
-      const input = container.getElementsByTagName('input')[0];
-      if (+input.getAttribute('aria-valuenow') == 0) return;
-      audioButton.click();
-      isMutedByAds = true;
-    } catch (err) {
-      console.log(err);
-    }
-  };
-  const handleVideoAds = () => {
-    const isAdPlaying = document.querySelectorAll(
-      '[data-a-target="video-ad-countdown"]'
-    );
+          callback();
+        }, 150);
+      },
 
-    if (!isAdPlaying.length) {
-      setAutomaticQuality();
-      audioUnmute();
-      return;
-    }
+      quality: {
+        click: (callback) => {
+          setTimeout(() => {
+            document
+              .querySelectorAll('[role="menuitem"]')[2]
+              ?.querySelector('button')
+              ?.click();
 
-    log('ad detected');
-    isAdModeActive = true;
+            callback();
+          }, 150);
+        },
 
-    setLowQuality();
-    audioMute();
+        auto: () => {
+          if (!video.isQualityChangedByAds) return;
+          try {
+            video.config.click();
+            video.isQualityChangedByAds = false;
+            video.config.quality.click(() => {
+              setTimeout(() => {
+                document.querySelectorAll('[role="menuitemradio"]')[0]?.click();
+                document.querySelector('.Layout-sc-1xcs6mc-0.kuGBVB')?.click();
+              }, 100);
+            });
+          } catch (err) {
+            console.log(err);
+          }
+        },
+        low: () => {
+          if (video.isQualityChangedByAds) return;
+          try {
+            video.config.click();
+            video.isQualityChangedByAds = true;
+            video.config.quality.click(() => {
+              setTimeout(() => {
+                const options = document.querySelectorAll(
+                  '[role="menuitemradio"]'
+                );
+                options[options.length - 1]?.click();
+                document.querySelector('.Layout-sc-1xcs6mc-0.kuGBVB')?.click();
+              }, 100);
+            });
+          } catch (err) {
+            console.log(err);
+          }
+        },
+      },
+    },
   };
 
   /**
-   * Observer =============================
+   * Starting events ===========================
    */
-  const ob = new MutationObserver((mutations) => {
-    log('mutation observed');
-    console.log(mutations);
-    // console.log(
-    //   document.querySelectorAll(
-    //     '[data-a-target="player-overlay-click-handler"]'
-    //   )
-    // );
-    // if (
-    //   !document.querySelectorAll(
-    //     '[data-a-target="player-overlay-click-handler"]'
-    //   ).length
-    // )
-    //   return;
+  setInterval(() => {
+    if (storage.data.sites.twitch.autoAdsMute) {
+      const isAdPlaying = document.querySelectorAll(
+        '[data-a-target="video-ad-countdown"]'
+      );
 
-    // log('ad detected');
+      if (!isAdPlaying.length) {
+        video.config.quality.auto();
+        audio.unmute();
+        return;
+      }
 
-    // mutations.forEach((mutation) => {
-    //   if (mutation.attributeName === 'class') {
-    //     const currentState = mutation.target.classList.contains('is-busy');
-    //     if (prevState !== currentState) {
-    //       prevState = currentState;
-    //       console.log(`'is-busy' class ${currentState ? 'added' : 'removed'}`);
-    //     }
-    //   }
-    // });
+      log('ad detected');
 
-    // handleVideoAds();
-  });
-  ob.observe(document.querySelector('.video-player__default-player'), {
-    attributes: true,
-    childList: true,
-    subtree: true,
-  });
+      video.config.quality.low();
+      audio.mute();
+    }
+  }, 200);
 
   log(`loaded in ${Math.round(performance.now() - startTime)}ms.`);
 };
@@ -172,3 +195,12 @@ document.addEventListener('readystatechange', (event) => {
     init();
   }
 });
+
+const mergeObjects = (obj1, obj2) => {
+  for (let key in obj1) {
+    if (obj2.hasOwnProperty(key)) {
+      obj1[key] = obj2[key];
+    }
+  }
+  return obj1;
+};
