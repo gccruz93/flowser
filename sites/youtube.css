@@ -2,8 +2,10 @@
 ytd-ad-slot-renderer,
 ytd-search-pyv-renderer,
 ytd-companion-slot-renderer,
+ytd-engagement-panel-section-list-renderer,
 .ytd-ad-slot-renderer,
-.ytd-player-legacy-desktop-watch-ads-renderer {
+.ytd-player-legacy-desktop-watch-ads-renderer,
+.ytd-engagement-panel-section-list-renderer {
   display: none !important;
   height: 0 !important;
   width: 0 !important;
