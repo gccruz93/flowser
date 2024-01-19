@@ -139,16 +139,21 @@ const init = async () => {
 
   const confirmButton = {
     query: () => {
-      return document.getElementById('confirm-button');
+      return document.querySelector('yt-confirm-dialog-renderer');
     },
 
     click: () => {
       const el = confirmButton.query();
       if (!el) return;
-      log(el);
-      if (!el.classList.contains('yt-confirm-dialog-renderer')) return;
+
+      const buttons = document.querySelectorAll('[aria-label="Sim"]');
+      if (!buttons.length) return;
+
+      for (const skipButton of buttons) {
+        skipButton.click();
+      }
+
       log('confirmou');
-      el.click();
       storage.data.sites.youtube.autoConfirmSkipCount++;
     },
   };
