@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Flowser",
-  "version": "1.0.4",
-  "description": "Ad skiper/hider",
+  "version": "1.0.5",
+  "description": "A better flow in web experience.",
   "icons": {
     "48": "popup/icon.png"
   },
@@ -23,12 +23,12 @@
   ],
   "content_scripts": [
     {
-      "js": ["popup/jquery.min.js", "sites/youtube.js"],
+      "js": ["sites/youtube.js"],
       "css": ["sites/youtube.css"],
       "matches": ["https://*.youtube.com/*"]
     },
     {
-      "js": ["popup/jquery.min.js", "sites/twitch.js"],
+      "js": ["sites/twitch.js"],
       "matches": ["https://*.twitch.tv/*"]
     }
   ]

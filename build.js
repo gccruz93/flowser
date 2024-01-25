@@ -1,8 +1,8 @@
 import { cpSync, createWriteStream, mkdirSync, rmSync } from 'node:fs';
 import archiver from 'archiver';
-import packageJson from './package.json' assert { type: 'json' };
+import manifest from './manifest.json' assert { type: 'json' };
 
-console.log(`Building v${packageJson.version}`);
+console.log(`Building v${manifest.version}`);
 
 /**
  * Copying files...
@@ -21,7 +21,7 @@ cpSync('./sites', './dist/raw/sites', { recursive: true });
  * Zipping...
  */
 const archive = archiver('zip');
-const output = createWriteStream(`./dist/flowser-${packageJson.version}.zip`);
+const output = createWriteStream(`./dist/flowser-${manifest.version}.zip`);
 
 output.on('close', () => {
   console.log(archive.pointer() + ' total bytes');
