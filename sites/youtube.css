@@ -1,3 +1,6 @@
+/**
+ * Remoção de ads
+ */
 #player-ads,
 ytd-ad-slot-renderer,
 ytd-search-pyv-renderer,
@@ -13,4 +16,12 @@ ytd-engagement-panel-section-list-renderer,
   z-index: 0 !important;
   user-select: none !important;
   pointer-events: none !important;
+}
+
+/**
+ * Correção do overflow no texto de visualizações há 'tantos meses'
+ */
+ytd-video-meta-block:not([rich-meta])[inline-badges]
+  #metadata-line.ytd-video-meta-block {
+  -webkit-box-orient: unset !important;
 }

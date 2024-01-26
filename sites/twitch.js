@@ -1,63 +1,7 @@
 const init = async () => {
   const startTime = performance.now();
 
-  const log = (description, force = false) => {
-    // if (!force && !defaultStorage.config.logs) return;
-
-    const date = new Date();
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const seconds = date.getSeconds().toString().padStart(2, '0');
-
-    console.log(
-      '%s \x1b[36m%s \x1b[0m%s',
-      `${hours}:${minutes}:${seconds}`,
-      '[Flowser]',
-      description
-    );
-  };
-
-  const storage = {
-    data: {
-      config: {
-        logs: false,
-      },
-      sites: {
-        youtube: {
-          autoConfirmSkip: true,
-          autoConfirmSkipCount: 0,
-          autoVideoAdSkip: true,
-          autoVideoAdSkipCount: 0,
-          blockAdsCards: true,
-        },
-        twitch: {
-          autoAdsMute: true,
-          autoAdsMuteCount: 0,
-        },
-      },
-    },
-
-    load: async () => {
-      log('fetching storage...', true);
-      if (chrome.storage) {
-        const store = await chrome.storage.sync.get(['sites', 'config']);
-        storage.data = mergeObjects(storage.data, store);
-        console.log('storage', storage.data);
-        chrome.storage.sync.set(storage.data);
-      } else {
-        log('chrome.storage not found', true);
-      }
-    },
-    save: () => {
-      if (chrome.storage) {
-        chrome.storage.sync.set(storage.data);
-      }
-    },
-  };
-
-  await storage.load();
-
-  log('running on twitch...');
+  await flowser.storage.init();
 
   /**
    * Elements ===========================
@@ -99,32 +43,37 @@ const init = async () => {
     },
   };
   const clickDelayMs = 150;
+  let adDetected = false;
   const video = {
     isQualityChangedByAds: false,
 
     config: {
-      click: (callback) => {
+      click: (callback = false) => {
         const buttonsPlayerControls = document
           .querySelectorAll('[data-a-target="player-controls"]')[0]
           .getElementsByTagName('button');
         const configButton = buttonsPlayerControls[2];
         configButton.click();
 
-        setTimeout(() => {
-          callback();
-        }, clickDelayMs);
+        if (callback) {
+          setTimeout(() => {
+            callback();
+          }, clickDelayMs);
+        }
       },
 
       quality: {
-        click: (callback) => {
+        click: (callback = false) => {
           document
             .querySelectorAll('[role="menuitem"]')[2]
             ?.querySelector('button')
             ?.click();
 
-          setTimeout(() => {
-            callback();
-          }, clickDelayMs);
+          if (callback) {
+            setTimeout(() => {
+              callback();
+            }, clickDelayMs);
+          }
         },
         close: () => {},
 
@@ -167,7 +116,7 @@ const init = async () => {
    * Starting events ===========================
    */
   setInterval(() => {
-    if (storage.data.sites.twitch.autoAdsMute) {
+    if (flowser.storage.data.sites.twitch.adsMute) {
       const isAdPlaying = document.querySelectorAll(
         '[data-a-target="video-ad-countdown"]'
       );
@@ -175,17 +124,26 @@ const init = async () => {
       if (!isAdPlaying.length) {
         video.config.quality.auto();
         audio.unmute();
+        if (adDetected) {
+          adDetected = false;
+          flowser.utils.log('ad done');
+        }
         return;
       }
-
-      log('ad detected');
+      if (!adDetected) {
+        adDetected = true;
+        flowser.utils.log('ad detected');
+        flowser.storage.data.sites.twitch.adsMuteCount++;
+      }
 
       video.config.quality.low();
       audio.mute();
     }
-  }, 200);
+  }, 250);
 
-  log(`loaded in ${Math.round(performance.now() - startTime)}ms.`);
+  flowser.utils.log(
+    `loaded in ${Math.round(performance.now() - startTime)}ms.`
+  );
 };
 
 document.addEventListener('readystatechange', (event) => {
@@ -195,12 +153,3 @@ document.addEventListener('readystatechange', (event) => {
     init();
   }
 });
-
-const mergeObjects = (obj1, obj2) => {
-  for (let key in obj1) {
-    if (obj2.hasOwnProperty(key)) {
-      obj1[key] = obj2[key];
-    }
-  }
-  return obj1;
-};
