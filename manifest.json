@@ -23,12 +23,12 @@
   ],
   "content_scripts": [
     {
-      "js": ["sites/youtube.js"],
+      "js": ["core.js", "sites/youtube.js"],
       "css": ["sites/youtube.css"],
       "matches": ["https://*.youtube.com/*"]
     },
     {
-      "js": ["sites/twitch.js"],
+      "js": ["core.js", "sites/twitch.js"],
       "matches": ["https://*.twitch.tv/*"]
     }
   ]
