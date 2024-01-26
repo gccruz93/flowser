@@ -5,6 +5,7 @@
     <link rel="icon" href="favicon.ico" />
     <link rel="stylesheet" href="popup-dist.css" />
     <script src="jquery.min.js" defer></script>
+    <script src="../core.js" defer></script>
     <script src="popup.js" defer></script>
     <title>Flowser</title>
   </head>
@@ -105,40 +106,18 @@
             >
               <label
                 class="label-toggle"
-                title="Pula automaticamente propagandas em vídeos."
-              >
-                <input
-                  id="youtube-chk-autoVideoAdSkip"
-                  type="checkbox"
-                  class="toggle"
-                />
-                Pular Ads em vídeos
-              </label>
-              <label
-                class="label-toggle"
                 title="Impede que os vídeos pausem durante sua reprodução."
               >
                 <input
-                  id="youtube-chk-autoConfirmSkip"
+                  id="youtube-chk-confirmSkip"
                   type="checkbox"
                   class="toggle"
                 />
                 Auto confirmar reprodução
               </label>
-              <label
-                class="label-toggle"
-                title="Propagandas na lateral do vídeo e nas buscas."
-              >
-                <input
-                  id="youtube-chk-blockAdsCards"
-                  type="checkbox"
-                  class="toggle"
-                />
-                Bloquear Ads em cards
-              </label>
 
               <div class="mb-1 mt-3 text-sm text-neutral-400">
-                <span>Últ. atualização: </span> 15/01/2024
+                <span>Últ. atualização: </span> 25/01/2024
               </div>
             </div>
 
@@ -181,16 +160,12 @@
                 class="label-toggle"
                 title="Muta automaticamente propagandas em vídeos e reduz sua qualidade para 160p."
               >
-                <input
-                  id="twitch-chk-autoAdsMute"
-                  type="checkbox"
-                  class="toggle"
-                />
+                <input id="twitch-chk-adsMute" type="checkbox" class="toggle" />
                 Mutar propagandas
               </label>
 
               <div class="mb-1 mt-3 text-sm text-neutral-400">
-                <span>Últ. atualização: </span> 25/12/2023
+                <span>Últ. atualização: </span> 25/01/2024
               </div>
             </div>
           </div>
