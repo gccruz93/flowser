@@ -1,39 +1,28 @@
-const defaultStorage = {
-  config: {
-    logs: false,
-  },
-  sites: {
-    youtube: {
-      autoConfirmSkip: true,
-      autoConfirmSkipCount: 0,
-      autoVideoAdSkip: true,
-      autoVideoAdSkipCount: 0,
-      blockAdsCards: true,
-    },
-    twitch: {
-      autoAdsMute: true,
-      autoAdsMuteCount: 0,
-    },
-  },
-};
+try {
+  importScripts('/core.js');
+} catch (e) {
+  console.error(e);
+}
 
 chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   if (reason === 'install') {
-    console.log('storage installed!');
-    chrome.storage.sync.set(defaultStorage);
+    chrome.storage.local.set(flowser.storage.default);
   }
 
-  let storage = await chrome.storage.sync.get(['sites', 'config']);
-  storage = mergeObjects(defaultStorage, storage);
-  console.log('storage', storage);
-  chrome.storage.sync.set(storage);
+  const f = async () => {
+    let storageSync = await chrome.storage.sync.get(['sites', 'config']);
+    let storageLocal = await chrome.storage.local.get(['sites', 'config']);
+    let newStorage = flowser.utils.mergeObjects(storageLocal, storageSync);
+    newStorage = flowser.utils.mergeObjects(
+      newStorage,
+      flowser.storage.default
+    );
+    try {
+      chrome.storage.sync.set(newStorage);
+    } catch (error) {}
+  };
+  f();
+  flowser.storage.syncInterval = setInterval(async () => {
+    f();
+  }, 600000); // 10min
 });
-
-function mergeObjects(obj1, obj2) {
-  for (let key in obj1) {
-    if (obj2.hasOwnProperty(key)) {
-      obj1[key] = obj2[key];
-    }
-  }
-  return obj1;
-}
