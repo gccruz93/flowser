@@ -49,41 +49,57 @@ const init = async () => {
 
     config: {
       click: (callback = false) => {
-        const buttonsPlayerControls = document
+        document
           .querySelectorAll('[data-a-target="player-controls"]')[0]
-          .getElementsByTagName('button');
-        const configButton = buttonsPlayerControls[2];
-        configButton.click();
-
-        if (callback) {
-          setTimeout(() => {
-            callback();
-          }, clickDelayMs);
-        }
+          .getElementsByTagName('button')[2]
+          .click();
+        if (!callback) return;
+        setTimeout(() => {
+          callback();
+        }, clickDelayMs);
+      },
+      buttonsList: () => {
+        return document.querySelectorAll(
+          '[aria-labelledby="active-settings-menu-header"] [role="menuitem"]'
+        );
       },
 
       quality: {
         click: (callback = false) => {
-          document
-            .querySelectorAll('[role="menuitem"]')[2]
-            ?.querySelector('button')
-            ?.click();
+          video.config.buttonsList()[2]?.querySelector('button')?.click();
+          if (!callback) return;
+          setTimeout(() => {
+            callback();
+          }, clickDelayMs);
+        },
+        buttonsList: () => {
+          return document.querySelectorAll(
+            '[aria-labelledby="active-settings-menu-header"] [role="menuitemradio"]'
+          );
+        },
 
-          if (callback) {
-            setTimeout(() => {
-              callback();
-            }, clickDelayMs);
+        previousState: 0,
+        saveCurrentState: () => {
+          const options = video.config.quality.buttonsList();
+          let index = 0;
+          for (const option of options) {
+            if (option.querySelector('input[type="checkbox"]:checked')) {
+              video.config.quality.previousState = index;
+              break;
+            }
+            index++;
           }
         },
-        close: () => {},
 
-        auto: () => {
+        previous: () => {
           if (!video.isQualityChangedByAds) return;
           try {
             video.config.click(() => {
               video.isQualityChangedByAds = false;
               video.config.quality.click(() => {
-                document.querySelectorAll('[role="menuitemradio"]')[0]?.click();
+                const options = video.config.quality.buttonsList();
+                options[video.config.quality.previousState]?.click();
+                video.config.quality.previousState = 0;
                 video.config.click();
               });
             });
@@ -97,9 +113,8 @@ const init = async () => {
             video.config.click(() => {
               video.isQualityChangedByAds = true;
               video.config.quality.click(() => {
-                const options = document.querySelectorAll(
-                  '[role="menuitemradio"]'
-                );
+                video.config.quality.saveCurrentState();
+                const options = video.config.quality.buttonsList();
                 options[options.length - 1]?.click();
                 video.config.click();
               });
@@ -122,7 +137,7 @@ const init = async () => {
       );
 
       if (!isAdPlaying.length) {
-        video.config.quality.auto();
+        video.config.quality.previous();
         audio.unmute();
         if (adDetected) {
           adDetected = false;
@@ -134,6 +149,7 @@ const init = async () => {
         adDetected = true;
         flowser.utils.log('ad detected');
         flowser.storage.data.sites.twitch.adsMuteCount++;
+        flowser.storage.save();
       }
 
       video.config.quality.low();
