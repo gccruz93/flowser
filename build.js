@@ -14,6 +14,7 @@ mkdirSync('./dist/raw', { recursive: true });
 
 cpSync('./manifest.json', './dist/raw/manifest.json');
 cpSync('./service_worker.js', './dist/raw/service_worker.js');
+cpSync('./core.js', './dist/raw/core.js');
 cpSync('./popup', './dist/raw/popup', { recursive: true });
 cpSync('./sites', './dist/raw/sites', { recursive: true });
 
