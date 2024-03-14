@@ -5,6 +5,6 @@
     "build": "node ./build.js"
   },
   "devDependencies": {
-    "archiver": "^6.0.1"
+    "archiver": "^7.0.1"
   }
 }
