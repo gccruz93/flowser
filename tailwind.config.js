@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: ['popup/popup.html'],
+
   theme: {
     extend: {
       borderColor: {
@@ -18,6 +19,7 @@ module.exports = {
       },
     },
   },
+
   experimental: {
     optimizeUniversalDefaults: true,
   },

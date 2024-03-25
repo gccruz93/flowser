@@ -5,6 +5,7 @@
     "build": "node ./build.js"
   },
   "devDependencies": {
+    "@types/chrome": "^0.0.263",
     "archiver": "^7.0.1"
   }
 }

@@ -1,6 +1,6 @@
 import { cpSync, createWriteStream, mkdirSync, rmSync } from 'node:fs';
 import archiver from 'archiver';
-import manifest from './manifest.json' assert { type: 'json' };
+import manifest from './src/manifest.json' assert { type: 'json' };
 
 console.log(`Building v${manifest.version}`);
 
@@ -12,9 +12,8 @@ try {
 } catch (error) {}
 mkdirSync('./dist/raw', { recursive: true });
 
-cpSync('./manifest.json', './dist/raw/manifest.json');
-cpSync('./service_worker.js', './dist/raw/service_worker.js');
-cpSync('./core.js', './dist/raw/core.js');
+cpSync('./src/manifest.json', './dist/raw/manifest.json');
+cpSync('./src/background.js', './dist/raw/background.js');
 cpSync('./popup', './dist/raw/popup', { recursive: true });
 cpSync('./sites', './dist/raw/sites', { recursive: true });
 
