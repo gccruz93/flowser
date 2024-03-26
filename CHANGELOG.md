@@ -1,6 +1,6 @@
-## 1.1.0 (2024-01-26)
+## 1.1.0 (2024-03-26)
 
-* Refatoração + otimização de código.
+* Refatoração geral e correção de erros. Primeira versão estável.
 
 ## 1.0.5 (2024-01-26)
 
