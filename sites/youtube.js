@@ -26,18 +26,20 @@ setInterval(() => {
 setInterval(() => {
   const el = document.querySelector('yt-confirm-dialog-renderer');
   if (!el) return;
+  console.log('yt-confirm-dialog', { el });
 
   const buttons = document.querySelectorAll('[aria-label="Sim"]');
   if (!buttons.length) return;
 
-  for (const btn of buttons) btn.click();
+  console.log({ buttons });
+  // for (const btn of buttons) btn.click();
 
-  chrome.runtime.sendMessage({
-    action: 'set-storage',
-    site: 'youtube',
-    key: 'confirmSkipCount',
-    value: 'increment',
-  });
+  // chrome.runtime.sendMessage({
+  //   action: 'set-storage',
+  //   site: 'youtube',
+  //   key: 'confirmSkipCount',
+  //   value: 'increment',
+  // });
 }, 1000);
 
 const video = {

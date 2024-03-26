@@ -20,41 +20,29 @@ const mergeObjects = (a, b) => {
 
 (async () => {
   storage = JSON.parse(JSON.stringify(defaultStorage));
-  console.log(1, storage.sites.twitch.adsMute);
-  const cloudStorage = (await chrome.storage.sync.get('storage')) || {};
+  const cloudStorage = (await chrome.storage.sync.get()) || {};
   storage = mergeObjects(storage, cloudStorage);
-  console.log(2, storage.sites.twitch.adsMute);
-  const localStorage = (await chrome.storage.local.get('storage')) || {};
+  const localStorage = (await chrome.storage.local.get()) || {};
   storage = mergeObjects(storage, localStorage);
-  console.log(3, storage.sites.twitch.adsMute);
-
-  const syncLocal = async () => {
-    console.log('syncLocal');
-    chrome.storage.local.set({ storage });
-  };
-  syncLocal();
-  setInterval(() => syncLocal(), 5000);
+  chrome.storage.local.set(storage);
 
   const syncCloud = async () => {
-    console.log('syncCloud');
     chrome.storage.sync.set(storage);
   };
-  syncCloud();
   setInterval(() => syncCloud(), 600000); // 10min
 })();
 
 const throttle = {};
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-  console.log('onMessage', { sender, request, storage });
+  // console.log('onMessage', { sender: sender.origin, request, storage });
 
   if (request.action == 'set-storage') {
-    if (!throttle[`${request.site}-${request.key}`])
+    if (!throttle[`${request.site}-${request.key}`]) {
       throttle[`${request.site}-${request.key}`] = performance.now();
-    else if (
+    } else if (
       performance.now() - throttle[`${request.site}-${request.key}`] <
       1000
     ) {
-      console.log('throttled');
       return;
     }
   }
@@ -75,10 +63,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       } else {
         storage.sites[request.site][request.key] = request.value;
       }
+      chrome.storage.local.set(storage);
       break;
     case 'clear-storage':
       storage = JSON.parse(JSON.stringify(defaultStorage));
-      chrome.storage.local.set({ storage });
+      chrome.storage.local.set(storage);
     default:
   }
 
