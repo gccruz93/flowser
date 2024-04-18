@@ -24,23 +24,28 @@ setInterval(() => {
  * Confirm dialog
  */
 setInterval(() => {
-  const el = document.querySelector('yt-confirm-dialog-renderer');
-  if (!el) return;
-  console.log('yt-confirm-dialog', { el });
+  const dialog = document.querySelector('yt-confirm-dialog-renderer');
+  if (dialog) {
+    const buttons = dialog.querySelectorAll('[aria-label="Sim"]');
+    if (buttons.length) {
+      for (const btn of buttons) btn.click();
+      dialog.remove()
+      console.log('dialog clicked')
+      chrome.runtime.sendMessage({
+        action: 'set-storage',
+        site: 'youtube',
+        key: 'confirmSkipCount',
+        value: 'increment',
+      });
+    }
+    const overlay = document.getElementsByTagName("tp-yt-iron-overlay-backdrop")
+    if (overlay.length) {
+      overlay[0].click()
+      console.log('overlay clicked')
+    }
+  }
 
-  const buttons = document.querySelectorAll('[aria-label="Sim"]');
-  if (!buttons.length) return;
-
-  console.log({ buttons });
-  // for (const btn of buttons) btn.click();
-
-  // chrome.runtime.sendMessage({
-  //   action: 'set-storage',
-  //   site: 'youtube',
-  //   key: 'confirmSkipCount',
-  //   value: 'increment',
-  // });
-}, 1000);
+}, 2000);
 
 const video = {
   id: '',
