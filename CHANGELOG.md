@@ -1,3 +1,7 @@
+## 1.1.1 (2024-04-16)
+
+* Youtube: fix no auto clicker do overlay.
+
 ## 1.1.0 (2024-03-26)
 
 * Refatoração geral e correção de erros. Primeira versão estável.
