@@ -1,6 +1,6 @@
 import { cpSync, createWriteStream, mkdirSync, rmSync } from 'node:fs';
 import archiver from 'archiver';
-import manifest from './src/manifest.json' assert { type: 'json' };
+import manifest from './src/manifest.json' with { type: 'json' };
 
 console.log(`Building v${manifest.version}`);
 
