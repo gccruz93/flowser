@@ -4,10 +4,20 @@
 setInterval(() => {
   if (!document.querySelector('.ad-showing')) return;
 
-  const buttons = document.querySelectorAll('.ytp-ad-skip-button-modern');
+  const buttons = document.querySelectorAll('.ytp-skip-ad-button');
   if (buttons.length == 0) {
     const video = document.querySelector('.ad-showing video');
-    video.currentTime = video?.duration || 9999;
+    if (video && video.duration > 0) {
+      let adInterval = 0
+      const increment = video.duration * 0.05
+      adInterval = setInterval(() => {
+        if (video.currentTime + increment < video.duration) {
+          video.currentTime += increment
+        } else {
+          clearInterval(adInterval)
+        }
+      }, 100)
+    }
   } else {
     for (const btn of buttons) btn.click();
   }
