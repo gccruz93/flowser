@@ -8,15 +8,14 @@ setInterval(() => {
   if (buttons.length == 0) {
     const video = document.querySelector('.ad-showing video');
     if (video && video.duration > 0) {
-      let adInterval = 0
       const increment = video.duration * 0.05
-      adInterval = setInterval(() => {
+      const incrementCurrentTime = () => {
+        console.log('incrementing')
         if (video.currentTime + increment < video.duration) {
           video.currentTime += increment
-        } else {
-          clearInterval(adInterval)
+          setTimeout(() => incrementCurrentTime(), 100)
         }
-      }, 100)
+      }
     }
   } else {
     for (const btn of buttons) btn.click();
