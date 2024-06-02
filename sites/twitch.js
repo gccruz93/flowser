@@ -146,7 +146,7 @@ setInterval(() => {
 
   if (isAdPlaying) {
     if (!adDetected) {
-      console.log('ad detected');
+      // console.log('ad detected');
       adDetected = true;
       chrome.runtime.sendMessage({
         action: 'set-storage',
@@ -169,10 +169,10 @@ setInterval(() => {
           picturePlayer.style.left = '50px';
           picturePlayer.style.maxHeight = 'unset';
           picturePlayer.style.height = videoPlayerRect.height + 'px';
-          picturePlayer.style.width = videoPlayerRect.width + 'px';
+          picturePlayer.style.width = 'auto';
           const main = document.getElementsByTagName('main')[0];
           main.appendChild(picturePlayer);
-          console.log('picture player teleported');
+          // console.log('picture player teleported');
         } else {
           await fakeAwait(100);
           teleportPicturePlayer();
@@ -181,7 +181,7 @@ setInterval(() => {
       teleportPicturePlayer();
     }
   } else if (adDetected) {
-    console.log('ad done');
+    // console.log('ad done');
     adDetected = false;
     audio.unmute();
     const picturePlayer = document.querySelector(

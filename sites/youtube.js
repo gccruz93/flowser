@@ -6,17 +6,17 @@ setInterval(() => {
 
   const buttons = document.querySelectorAll('.ytp-skip-ad-button');
   if (buttons.length == 0) {
-    const video = document.querySelector('.ad-showing video');
-    if (video && video.duration > 0) {
-      const increment = video.duration * 0.05;
-      const incrementCurrentTime = () => {
-        if (video.currentTime < video.duration * 0.6) {
-          video.currentTime += increment;
-          setTimeout(() => incrementCurrentTime(), 100);
-        }
-      };
-      incrementCurrentTime();
-    }
+    // const skipAd = () => {
+    //   const video = document.querySelector('.ad-showing video');
+    //   if (video && video.duration > 0) {
+    //     const increment = video.duration * 0.05;
+    //     if (video.currentTime < video.duration * 0.6) {
+    //       video.currentTime += increment;
+    //       setTimeout(() => skipAd(), 100);
+    //     }
+    //   }
+    // };
+    // skipAd();
   } else {
     for (const btn of buttons) btn.click();
   }
