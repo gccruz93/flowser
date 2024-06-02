@@ -130,36 +130,66 @@ const video = {
   },
 };
 
+const fakeAwait = (ms) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
 /**
  * Starting events ===========================
  */
 setInterval(() => {
-  if (storage.adsMute) {
-    const isAdPlaying = document.querySelectorAll(
-      '[data-a-target="video-ad-countdown"]'
-    );
+  if (!storage.adsMute) return;
 
-    if (!isAdPlaying.length) {
-      video.config.quality.previous();
-      audio.unmute();
-      if (adDetected) {
-        adDetected = false;
-        console.log('ad done');
-      }
-      return;
-    }
+  const isAdPlaying = document.querySelector(
+    '[data-a-target="video-ad-countdown"]'
+  );
+
+  if (isAdPlaying) {
     if (!adDetected) {
-      adDetected = true;
       console.log('ad detected');
+      adDetected = true;
       chrome.runtime.sendMessage({
         action: 'set-storage',
         site: 'twitch',
         key: 'adsMuteCount',
         value: 'increment',
       });
+      // video.config.quality.low();
+      audio.mute();
+      const teleportPicturePlayer = async () => {
+        /**@type {HTMLElement} */
+        const picturePlayer = document.querySelector(
+          '.picture-by-picture-player'
+        );
+        if (picturePlayer) {
+          const videoPlayer = document.querySelector('.persistent-player');
+          const videoPlayerRect = videoPlayer.getBoundingClientRect();
+          picturePlayer.style.position = 'fixed';
+          picturePlayer.style.top = '50px';
+          picturePlayer.style.left = '50px';
+          picturePlayer.style.maxHeight = 'unset';
+          picturePlayer.style.height = videoPlayerRect.height + 'px';
+          picturePlayer.style.width = videoPlayerRect.width + 'px';
+          const main = document.getElementsByTagName('main')[0];
+          main.appendChild(picturePlayer);
+          console.log('picture player teleported');
+        } else {
+          await fakeAwait(100);
+          teleportPicturePlayer();
+        }
+      };
+      teleportPicturePlayer();
     }
-
-    video.config.quality.low();
-    audio.mute();
+  } else if (adDetected) {
+    console.log('ad done');
+    adDetected = false;
+    audio.unmute();
+    const picturePlayer = document.querySelector(
+      'main > .picture-by-picture-player'
+    );
+    if (picturePlayer) {
+      picturePlayer.remove();
+    }
+    // video.config.quality.previous();
   }
 }, 200);
