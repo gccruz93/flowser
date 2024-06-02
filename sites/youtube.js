@@ -10,12 +10,12 @@ setInterval(() => {
     if (video && video.duration > 0) {
       const increment = video.duration * 0.05;
       const incrementCurrentTime = () => {
-        console.log('incrementing');
-        if (video.currentTime + increment < video.duration) {
+        if (video.currentTime < video.duration * 0.6) {
           video.currentTime += increment;
           setTimeout(() => incrementCurrentTime(), 100);
         }
       };
+      incrementCurrentTime();
     }
   } else {
     for (const btn of buttons) btn.click();
