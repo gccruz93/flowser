@@ -8,14 +8,14 @@ setInterval(() => {
   if (buttons.length == 0) {
     const video = document.querySelector('.ad-showing video');
     if (video && video.duration > 0) {
-      const increment = video.duration * 0.05
+      const increment = video.duration * 0.05;
       const incrementCurrentTime = () => {
-        console.log('incrementing')
+        console.log('incrementing');
         if (video.currentTime + increment < video.duration) {
-          video.currentTime += increment
-          setTimeout(() => incrementCurrentTime(), 100)
+          video.currentTime += increment;
+          setTimeout(() => incrementCurrentTime(), 100);
         }
-      }
+      };
     }
   } else {
     for (const btn of buttons) btn.click();
@@ -38,8 +38,8 @@ setInterval(() => {
     const buttons = dialog.querySelectorAll('[aria-label="Sim"]');
     if (buttons.length) {
       for (const btn of buttons) btn.click();
-      dialog.remove()
-      console.log('dialog clicked')
+      dialog.remove();
+      console.log('dialog clicked');
       chrome.runtime.sendMessage({
         action: 'set-storage',
         site: 'youtube',
@@ -47,13 +47,14 @@ setInterval(() => {
         value: 'increment',
       });
     }
-    const overlay = document.getElementsByTagName("tp-yt-iron-overlay-backdrop")
+    const overlay = document.getElementsByTagName(
+      'tp-yt-iron-overlay-backdrop'
+    );
     if (overlay.length) {
-      overlay[0].click()
-      console.log('overlay clicked')
+      overlay[0].click();
+      console.log('overlay clicked');
     }
   }
-
 }, 2000);
 
 const video = {
